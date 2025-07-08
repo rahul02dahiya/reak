@@ -77,6 +77,7 @@ const UserList = () => {
       fetchUsers(); 
     } catch (error) {
       alert("Failed to save user: " + error.message);
+      console.log(error)
     }
   };
 
