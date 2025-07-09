@@ -1,8 +1,8 @@
-// UserForm.js
 import React, { useEffect, useState } from "react";
 
-const UserForm = ({ modalType, modalHeading, userData, onSubmit }) => {
+  const UserForm = ({ modalType, modalHeading, userData, onSubmit }) => {
   const [formData, setFormData] = useState({ name: "", mobile: "", email: "" });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (modalType === "edit" && userData) {
@@ -17,11 +17,35 @@ const UserForm = ({ modalType, modalHeading, userData, onSubmit }) => {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
+  const handleReset = ()=>{
+    if (modalType === "add") {
+    setFormData({ name: "", mobile: "", email: "" });
+    }
+    setError(""); 
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!(formData.name.length>2 && /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(formData.name))) {
+      setError("Please enter a valid name")
+      return
+    }
+
+    if(!(/^[6-9][0-9]{9}$/.test(formData.mobile))){
+      setError("Please enter a valid mobile 10 digit number")
+      return
+    }
+
+     setError(""); 
+     try {
     await onSubmit(formData);
     const closeBtn = document.querySelector("#UserFormModal .btn-close");
     if (closeBtn) closeBtn.click();
+  } catch (err) {
+    const msg = err?.response?.data?.message || "Something went wrong";
+    setError(msg)
+  }
   };
 
   return (
@@ -31,7 +55,8 @@ const UserForm = ({ modalType, modalHeading, userData, onSubmit }) => {
       tabIndex="-1"
       aria-labelledby="UserModalLabel"
       aria-hidden="true"
-    >
+      data-bs-backdrop="false"
+      >
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
@@ -43,10 +68,16 @@ const UserForm = ({ modalType, modalHeading, userData, onSubmit }) => {
               className="btn-close"
               data-bs-dismiss="modal"
               aria-label="Close"
+              onClick={handleReset}
             ></button>
           </div>
           <form onSubmit={handleSubmit}>
             <div className="modal-body text-start">
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
               <div className="mb-3">
                 <label htmlFor="name" className="form-label">
                   User name
@@ -72,7 +103,6 @@ const UserForm = ({ modalType, modalHeading, userData, onSubmit }) => {
                   className="form-control"
                   id="mobile"
                   placeholder="Enter 10 digit mobile number"
-                  pattern="[6-9][0-9]{9}"
                   value={formData.mobile}
                   onChange={handleChange}
                 />
@@ -98,6 +128,7 @@ const UserForm = ({ modalType, modalHeading, userData, onSubmit }) => {
                 type="button"
                 className="btn btn-secondary"
                 data-bs-dismiss="modal"
+                onClick={handleReset}
               >
                 Cancel
               </button>

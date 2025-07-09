@@ -1,8 +1,7 @@
-// UserList.js
 import React, { useEffect, useState } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { IoPersonAddSharp } from "react-icons/io5";
-import { FaUserEdit } from "react-icons/fa";
+import { FaUserEdit, FaRegFrownOpen } from "react-icons/fa";
 import UserForm from "./UserForm";
 
 const UserList = () => {
@@ -13,7 +12,7 @@ const UserList = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/users/");
+      const response = await fetch("http://localhost:8080/api/users");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -42,7 +41,7 @@ const UserList = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+      const response = await fetch(`http://localhost:8080/api/users/${id}`, {
         method: "DELETE",
       });
       if (!response.ok) {
@@ -54,32 +53,34 @@ const UserList = () => {
     }
   };
 
-  const handleSubmit = async (formData) => {
-    try {
-      const url =
-        modalType === "add"
-          ? "http://localhost:5000/api/users"
-          : `http://localhost:5000/api/users/${selectedUser.id}`;
-      const method = modalType === "add" ? "POST" : "PUT";
+    const handleSubmit = async (formData) => {                     
+    const url =                                                  
+      modalType === "add"                                        
+        ? "http://localhost:8080/api/users"                      
+        : `http://localhost:8080/api/users/${selectedUser.id}`; 
+    const method = modalType === "add" ? "POST" : "PUT";        
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+    const response = await fetch(url, {                         
+      method,                                                   
+      headers: { "Content-Type": "application/json" },          
+      body: JSON.stringify(formData),                           
+    });                                                         
 
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
-      }
+    const data = await response.json();                         
 
-      fetchUsers(); 
-    } catch (error) {
-      alert("Failed to save user: " + error.message);
-      console.log(error)
-    }
-  };
+    if (!response.ok) {                                   
+      const message = data?.message || "Something went wrong";  
+      console.log("this one : ", message)     
+      throw {                                                   
+        response: {                                             
+          data: { message },                                    
+        },                                                      
+      };  
+                                                       
+    }                                                           
+
+    fetchUsers();                                               
+  };                                                            
 
   return (
     <div className="container m-4 p-4">
@@ -96,6 +97,7 @@ const UserList = () => {
         </button>
       </div>
 
+      
       <table className="table table-responsive text-center">
         <thead className="table-primary">
           <tr>
@@ -107,7 +109,8 @@ const UserList = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {
+          users.map((user) => (
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.name}</td>
@@ -132,8 +135,9 @@ const UserList = () => {
             </tr>
           ))}
         </tbody>
+        
       </table>
-
+      {users.length===0?(<h3 className="m-4"><FaRegFrownOpen /> No users found, please add</h3>):""}
       <UserForm
         modalType={modalType}
         modalHeading={modalHeading}
