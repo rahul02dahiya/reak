@@ -19,7 +19,7 @@ const UserList = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setUsers(data);
+      setUsers(data?data:[]);
     } catch (err) {
       alert("Failed to fetch users: " + err.message);
     }
@@ -109,7 +109,7 @@ const UserList = () => {
           </tr>
         </thead>
         <tbody>
-          {users ? (
+          {users.length!==0 ? (
             users.map((user) => (
               <tr key={user.id}>
                 <td>{user.id}</td>
@@ -135,7 +135,7 @@ const UserList = () => {
               </tr>
             ))
           ) : (
-            <h3 className="m-4"> <FaRegFrownOpen/> No users found, please add </h3>
+            <tr ><th colSpan={5}><h3 className="m-4"> <FaRegFrownOpen className="mb-1"/> No users found, please add </h3></th></tr>
           )}
         </tbody>
       </table>
