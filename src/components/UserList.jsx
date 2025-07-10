@@ -5,14 +5,16 @@ import { FaUserEdit, FaRegFrownOpen } from "react-icons/fa";
 import UserForm from "./UserForm";
 
 const UserList = () => {
+  const baseURL = process.env.REACT_APP_BASE_URL;
   const [users, setUsers] = useState([]);
   const [modalType, setModalType] = useState("add");
   const [modalHeading, setModalHeading] = useState("Add new user");
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState([]);
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/users");
+      console.log(baseURL)
+      const response = await fetch(`${baseURL}/users`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -41,7 +43,7 @@ const UserList = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${id}`, {
+      const response = await fetch(`${baseURL}/users/${id}`, {
         method: "DELETE",
       });
       if (!response.ok) {
@@ -53,34 +55,33 @@ const UserList = () => {
     }
   };
 
-    const handleSubmit = async (formData) => {                     
-    const url =                                                  
-      modalType === "add"                                        
-        ? "http://localhost:8080/api/users"                      
-        : `http://localhost:8080/api/users/${selectedUser.id}`; 
-    const method = modalType === "add" ? "POST" : "PUT";        
+  const handleSubmit = async (formData) => {
+    const url =
+      modalType === "add"
+        ? `${baseURL}/users`
+        : `${baseURL}/users/${selectedUser.id}`;
+    const method = modalType === "add" ? "POST" : "PUT";
 
-    const response = await fetch(url, {                         
-      method,                                                   
-      headers: { "Content-Type": "application/json" },          
-      body: JSON.stringify(formData),                           
-    });                                                         
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
 
-    const data = await response.json();                         
+    const data = await response.json();
 
-    if (!response.ok) {                                   
-      const message = data?.message || "Something went wrong";  
-      console.log("this one : ", message)     
-      throw {                                                   
-        response: {                                             
-          data: { message },                                    
-        },                                                      
-      };  
-                                                       
-    }                                                           
+    if (!response.ok) {
+      const message = data?.message || "Something went wrong";
+      console.log("this one : ", message);
+      throw {
+        response: {
+          data: { message },
+        },
+      };
+    }
 
-    fetchUsers();                                               
-  };                                                            
+    fetchUsers();
+  };
 
   return (
     <div className="container m-4 p-4">
@@ -97,7 +98,6 @@ const UserList = () => {
         </button>
       </div>
 
-      
       <table className="table table-responsive text-center">
         <thead className="table-primary">
           <tr>
@@ -109,35 +109,36 @@ const UserList = () => {
           </tr>
         </thead>
         <tbody>
-          {
-          users.map((user) => (
-            <tr key={user.id}>
-              <td>{user.id}</td>
-              <td>{user.name}</td>
-              <td>{user.mobile}</td>
-              <td>{user.email}</td>
-              <td>
-                <button
-                  className="btn btn-warning mx-2"
-                  data-bs-toggle="modal"
-                  data-bs-target="#UserFormModal"
-                  onClick={() => handleEdit(user)}
-                >
-                  <FaUserEdit size={18} /> Edit
-                </button>
-                <button
-                  className="btn btn-sm bg-danger"
-                  onClick={() => handleDelete(user.id)}
-                >
-                  <MdDeleteForever size={20} className="text-light" />
-                </button>
-              </td>
-            </tr>
-          ))}
+          {users ? (
+            users.map((user) => (
+              <tr key={user.id}>
+                <td>{user.id}</td>
+                <td>{user.name}</td>
+                <td>{user.mobile}</td>
+                <td>{user.email}</td>
+                <td>
+                  <button
+                    className="btn btn-warning mx-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#UserFormModal"
+                    onClick={() => handleEdit(user)}
+                  >
+                    <FaUserEdit size={18} /> Edit
+                  </button>
+                  <button
+                    className="btn btn-sm bg-danger"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    <MdDeleteForever size={20} className="text-light" />
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <h3 className="m-4"> <FaRegFrownOpen/> No users found, please add </h3>
+          )}
         </tbody>
-        
       </table>
-      {users.length===0?(<h3 className="m-4"><FaRegFrownOpen /> No users found, please add</h3>):""}
       <UserForm
         modalType={modalType}
         modalHeading={modalHeading}

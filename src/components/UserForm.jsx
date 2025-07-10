@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { CgProfile } from "react-icons/cg";
 
   const UserForm = ({ modalType, modalHeading, userData, onSubmit }) => {
   const [formData, setFormData] = useState({ name: "", mobile: "", email: "" });
@@ -13,6 +14,7 @@ import React, { useEffect, useState } from "react";
   }, [modalType, userData]);
 
   const handleChange = (e) => {
+    setError(""); 
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
@@ -27,7 +29,7 @@ import React, { useEffect, useState } from "react";
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!(formData.name.length>2 && /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(formData.name))) {
+    if (!(formData.name.length>1 && /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(formData.name))) {
       setError("Please enter a valid name")
       return
     }
@@ -61,6 +63,7 @@ import React, { useEffect, useState } from "react";
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id="UserModalLabel">
+            <CgProfile className="mx-2 mb-1"/>
               {modalHeading}
             </h1>
             <button
